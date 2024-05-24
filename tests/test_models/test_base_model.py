@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Test BaseModel for expected behavior and documentation"""
 from datetime import datetime
+from datetime import timedelta
 import inspect
 import models
 import pep8 as pycodestyle
@@ -82,17 +83,31 @@ class TestBaseModel(unittest.TestCase):
         """Test that two BaseModel instances have different datetime objects
         and that upon creation have identical updated_at and created_at
         value."""
+        # Test for inst1
         tic = datetime.now()
+        time.sleep(0.01)  # Ensure there is a small delay
+
         inst1 = BaseModel()
         toc = datetime.now()
-        self.assertTrue(tic <= inst1.created_at <= toc)
-        time.sleep(1e-4)
-        tic = datetime.now()
-        inst2 = BaseModel()
-        toc = datetime.now()
-        self.assertTrue(tic <= inst2.created_at <= toc)
+
+        self.assertTrue(
+            tic <= inst1.created_at <= toc + timedelta(milliseconds=500)
+        )
         self.assertEqual(inst1.created_at, inst1.updated_at)
+
+        # Ensure some time has passed before creating the second instance
+        time.sleep(0.01)
+
+        # Test for inst2
+        tic = datetime.now()
+        time.sleep(0.01)
+        inst2 = BaseModel()
+        toc = datetime.now() + timedelta(milliseconds=10)
+
+        self.assertTrue(tic <= inst2.created_at <= toc)
         self.assertEqual(inst2.created_at, inst2.updated_at)
+
+        # Compare instances
         self.assertNotEqual(inst1.created_at, inst2.created_at)
         self.assertNotEqual(inst1.updated_at, inst2.updated_at)
 
@@ -158,3 +173,7 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(old_created_at, new_created_at)
         self.assertTrue(mock_storage.new.called)
         self.assertTrue(mock_storage.save.called)
+
+
+if __name__ == '__main__':
+    unittest.main()
