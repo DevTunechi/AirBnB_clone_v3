@@ -14,11 +14,15 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
+from models.user import User
+from models.engine.db_storage import DBStorage
 import json
 import os
 import pep8
 import unittest
+
 DBStorage = db_storage.DBStorage
+
 classes = {"Amenity": Amenity, "City": City, "Place": Place,
            "Review": Review, "State": State, "User": User}
 
@@ -86,3 +90,22 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
         """Test that save properly saves objects to file.json"""
+
+    def test_get(self):
+        storage = DBStorage()
+        user = User(email="test@test.com", password="password")
+        storage.new(user)
+        storage.save()
+        retrieved_user = storage.get(User, user.id)
+        self.assertEqual(user, retrieved_user)
+        self.assertIsNone(storage.get(User, "non-existent-id"))
+
+    def test_count(self):
+        storage = DBStorage()
+        initial_count = storage.count()
+        initial_user_count = storage.count(User)
+        user = User(email="test@test.com", password="password")
+        storage.new(user)
+        storage.save()
+        self.assertEqual(storage.count(), initial_count + 1)
+        self.assertEqual(storage.count(User), initial_user_count + 1)

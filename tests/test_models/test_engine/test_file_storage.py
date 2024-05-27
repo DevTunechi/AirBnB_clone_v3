@@ -18,6 +18,8 @@ import json
 import os
 import pep8
 import unittest
+from models.engine.file_storage import FileStorage
+from models.user import User
 FileStorage = file_storage.FileStorage
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
@@ -113,3 +115,22 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+    def test_get(self):
+        storage = FileStorage()
+        user = User(email="test@test.com", password="password")
+        storage.new(user)
+        storage.save()
+        retrieved_user = storage.get(User, user.id)
+        self.assertEqual(user, retrieved_user)
+        self.assertIsNone(storage.get(User, "non-existent-id"))
+
+    def test_count(self):
+        storage = FileStorage()
+        initial_count = storage.count()
+        initial_user_count = storage.count(User)
+        user = User(email="test@test.com", password="password")
+        storage.new(user)
+        storage.save()
+        self.assertEqual(storage.count(), initial_count + 1)
+        self.assertEqual(storage.count(User), initial_user_count + 1)
