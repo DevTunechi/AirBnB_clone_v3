@@ -14,8 +14,9 @@ from models.place import Place
 from models.review import Review
 from models.state import State
 from models.user import User
-from models.user import User
-from models.engine.db_storage import DBStorage
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from os import getenv
 import json
 import os
 import pep8
@@ -109,3 +110,4 @@ class TestFileStorage(unittest.TestCase):
         storage.save()
         self.assertEqual(storage.count(), initial_count + 1)
         self.assertEqual(storage.count(User), initial_user_count + 1)
+
